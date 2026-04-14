@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">업무보고.xlsx</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI','맑은 고딕',Arial,sans-serif;overflow:hidden;height:100vh;user-select:none;background:#fff;}
+#app{display:flex;flex-direction:column;height:100vh;}
+
+/* ── 타이틀바 ── */
+.tbar{background:#217346;color:#fff;height:32px;display:flex;align-items:center;padding:0 8px;font-size:12px;flex-shrink:0;position:relative;}
+.tbar-center{position:absolute;left:50%;transform:translateX(-50%);font-size:12px;white-space:nowrap;}
+.tbar-left{display:flex;align-items:center;gap:6px;font-size:11px;opacity:.85;}
+.tbar-btns{margin-left:auto;display:flex;}
+.tbar-btn{width:46px;height:32px;display:flex;align-items:center;justify-content:center;cursor:default;font-size:14px;}
+.tbar-btn:hover{background:rgba(255,255,255,.2);}
+.tbar-btn.close:hover{background:#e81123;}
+
+/* ── 리본 ── */
+.ribbon{background:#fff;border-bottom:1px solid #c8c8c8;flex-shrink:0;}
+.ribbon-tabs{display:flex;gap:0;padding:0 4px;background:#f3f3f3;border-bottom:1px solid #c8c8c8;}
+.rtab{padding:5px 12px;font-size:12px;cursor:default;border-bottom:2px solid transparent;color:#555;}
+.rtab.active{color:#217346;border-bottom-color:#217346;background:#fff;font-weight:600;}
+.ribbon-body{height:66px;display:flex;align-items:center;padding:4px 8px;gap:3px;overflow:hidden;}
+.rbtn{background:#fff;border:1px solid transparent;padding:2px 5px;font-size:10px;cursor:default;border-radius:2px;color:#444;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:36px;}
+.rbtn:hover{background:#e8f0fe;border-color:#c5d3f5;}
+.rbtn-icon{font-size:17px;line-height:1;}
+.rdiv{width:1px;height:50px;background:#d0d0d0;margin:0 3px;flex-shrink:0;}
+
+/* ── 수식 입력줄 ── */
+.fbar{height:24px;display:flex;align-items:center;border-bottom:1px solid #c8c8c8;background:#fff;flex-shrink:0;}
+.fbar-name{width:80px;border-right:1px solid #c8c8c8;height:100%;display:flex;align-items:center;padding:0 6px;font-size:11px;color:#444;flex-shrink:0;}
+.fbar-fx{padding:0 8px;font-size:13px;color:#888;font-style:italic;}
+.fbar-val{flex:1;height:100%;padding:0 6px;font-size:12px;color:#333;}
+
+/* ── 시트 영역 ── */
+#sheet-area{flex:1;overflow:hidden;position:relative;}
+.sheet{display:none;width:100%;height:100%;}
+.sheet.active{display:flex;flex-direction:column;}
+
+/* ── 시트 탭 ── */
+.stabs{height:24px;background:#f5f5f5;border-top:1px solid #c8c8c8;display:flex;align-items:flex-end;padding:0 4px;flex-shrink:0;}
+.stab{padding:0 14px;height:22px;font-size:11px;cursor:default;border:1px solid #c8c8c8;border-bottom:none;background:#e0e0e0;display:flex;align-items:center;gap:4px;margin-right:2px;border-radius:2px 2px 0 0;}
+.stab.active{background:#fff;font-weight:600;border-bottom:1px solid #fff;margin-bottom:-1px;}
+.stab:hover:not(.active){background:#ebebeb;}
+
+/* ── Sheet1 ── */
+#s1-wrap{overflow:auto;flex:1;}
+.s1-tbl{border-collapse:collapse;font-size:12px;}
+.s1-tbl th,.s1-tbl td{border:1px solid #d0d7de;min-width:80px;height:22px;padding:0;white-space:nowrap;}
+.s1-tbl th{background:#f2f2f2;text-align:center;font-weight:normal;color:#666;font-size:10px;position:sticky;top:0;z-index:2;}
+.s1-rnum{background:#f2f2f2;text-align:center;color:#666;font-size:10px;width:40px;min-width:40px;position:sticky;left:0;z-index:1;}
+.s1-tbl td{padding:0 4px;color:#333;cursor:default;}
+.s1-hdr td{background:#217346;color:#fff;font-weight:bold;text-align:center;}
+.s1-ttl{background:#e8f5e9;font-weight:bold;font-size:13px;padding:0 8px;}
+.s1-lbl{background:#f9f9f9;font-weight:500;}
+.s1-num{text-align:right;}
+.s1-total{background:#e8f5e9;font-weight:bold;}
+td.editing{outline:2px solid #217346;outline-offset:-2px;background:#f0fff4;}
+.s1-tbl td input{width:100%;height:100%;border:none;outline:none;background:transparent;font-size:12px;padding:0 4px;font-family:inherit;}
+
+/* ── Sheet2 게임 ── */
+#s2-wrap{display:flex;height:100%;overflow-x:auto;overflow-y:hidden;background:#fff;}
+.rnums{flex-shrink:0;background:#f2f2f2;border-right:1px solid #d0d0d0;display:flex;flex-direction:column;width:40px;}
+.rnums-top{height:20px;border-bottom:1px solid #d0d0d0;flex-shrink:0;}
+.rnum{height:22px;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;flex-shrink:0;}
+.gwrap{flex-shrink:0;display:flex;flex-direction:column;overflow-y:hidden;}
+.col-hdrs{display:flex;height:20px;border-bottom:1px solid #d0d0d0;background:#f2f2f2;flex-shrink:0;}
+.col-hdr{width:22px;height:20px;border-right:1px solid #e8e8e8;display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;flex-shrink:0;}
+#grid-rows{position:relative;}
+.grow{display:flex;}
+.gc{width:22px;height:22px;border-right:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0;flex-shrink:0;}
+.gc-head{background:#1b5e20;}
+.gc-body{background:#388e3c;}
+.gc-apple{background:#c62828;}
+.gc-golden{background:#ffd600;}
+.gc-golden-u{background:#ffca28;animation:blink .4s ease-in-out infinite alternate;}
+.gc-obs{background:#37474f;}
+@keyframes blink{from{opacity:1;}to{opacity:.55;}}
+.popup{position:absolute;font-weight:900;font-size:13px;pointer-events:none;white-space:nowrap;z-index:30;transform:translateX(-50%);animation:sfloat .85s ease-out forwards;}
+.popup-n{color:#43a047;text-shadow:0 0 4px rgba(0,0,0,.3);}
+.popup-g{color:#f9a825;text-shadow:0 0 4px rgba(0,0,0,.35);}
+@keyframes sfloat{
+  0%  {opacity:1;transform:translateX(-50%) translateY(0) scale(1.3);}
+  40% {opacity:1;transform:translateX(-50%) translateY(-14px) scale(1.1);}
+  100%{opacity:0;transform:translateX(-50%) translateY(-32px) scale(.9);}
+}
+#overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:20;background:rgba(255,255,255,.87);}
+.ovbox{background:#fff;border:1px solid #ccc;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.16);padding:22px;width:300px;}
+
+/* 정보 패널 */
+.ipanel{flex-shrink:0;border-left:1px solid #d0d0d0;background:#fff;width:248px;display:flex;flex-direction:column;overflow-y:auto;}
+.ip-chdrs{height:20px;border-bottom:1px solid #d0d0d0;background:#f2f2f2;display:flex;flex-shrink:0;}
+.ip-chd{border-right:1px solid #e0e0e0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;}
+.ir{display:flex;border-bottom:1px solid #e0e0e0;flex-shrink:0;}
+.ir-h54{height:54px;}
+.ir-div{background:#f5f5f5;border-bottom:1px solid #eee;height:22px;}
+.ir-rn{width:28px;border-right:1px solid #d0d0d0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;background:#f2f2f2;flex-shrink:0;height:100%;}
+.ir-lbl{width:108px;border-right:1px solid #e0e0e0;display:flex;align-items:center;padding:0 8px;font-size:11px;color:#888;flex-shrink:0;overflow:hidden;}
+.ir-val{flex:1;display:flex;align-items:center;padding:0 8px;font-size:11px;color:#333;overflow:hidden;}
+.ir-mrg{flex:1;display:flex;align-items:center;padding:0 8px;font-size:11px;color:#555;overflow:hidden;}
+.ir-dvline{flex:1;border-top:1px solid #e0e0e0;margin:0 8px;align-self:center;}
+.s1-filler{flex:1;background:#fff;border-left:1px solid #e0e0e0;}
+
+/* Sheet3 */
+#s3-wrap{overflow:auto;flex:1;}
+.s3-tbl{border-collapse:collapse;font-size:12px;min-width:100%;}
+.s3-tbl th,.s3-tbl td{border:1px solid #d0d7de;height:22px;padding:0;white-space:nowrap;}
+.s3-tbl th{background:#f2f2f2;text-align:center;font-weight:normal;color:#666;font-size:10px;position:sticky;top:0;z-index:2;}
+.s3-rnum{width:40px;background:#f2f2f2;text-align:center;color:#666;font-size:10px;position:sticky;left:0;z-index:1;}
+
+/* 공통 버튼 */
+.btn{padding:6px 16px;border-radius:4px;border:none;cursor:pointer;font-size:13px;font-weight:500;}
+.btn-g{background:#217346;color:#fff;} .btn-g:hover{background:#1a5c38;}
+.btn-o{background:#e65100;color:#fff;} .btn-o:hover{background:#bf360c;}
+.btn-r{background:#b71c1c;color:#fff;} .btn-r:hover{background:#7f0000;}
+.btn-gray{background:#f0f0f0;color:#444;} .btn-gray:hover{background:#ddd;}
+.btn-sm{padding:3px 9px;font-size:11px;border-radius:3px;border:none;cursor:pointer;}
+.diff-row{display:flex;gap:6px;margin-bottom:8px;}
+.dbtn{flex:1;padding:7px 4px;border:1px solid #ddd;background:#fff;border-radius:4px;font-size:11px;cursor:pointer;text-align:center;line-height:1.4;}
+.dbtn.sel-NORMAL{background:#217346;color:#fff;border-color:#217346;}
+.dbtn.sel-HARD  {background:#e65100;color:#fff;border-color:#e65100;}
+.dbtn.sel-HELL  {background:#b71c1c;color:#fff;border-color:#b71c1c;}
+.score-big{font-size:48px;font-weight:900;line-height:1;}
+.pbar-wrap{flex:1;height:6px;background:#f0f0f0;border-radius:3px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:3px;transition:width .1s;}
+input.nick-input{width:100%;border:1px solid #ccc;border-radius:4px;padding:5px 8px;font-size:13px;outline:none;font-family:inherit;}
+input.nick-input:focus{border-color:#217346;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 타이틀바 -->
+  <div class="tbar">
+    <div class="tbar-left">
+      <span>📊</span>
+      <span>파일</span><span>홈</span><span>삽입</span><span>페이지 레이아웃</span><span>수식</span><span>데이터</span><span>검토</span><span>보기</span>
+    </div>
+    <div class="tbar-center" id="file-title">2026년_4월_업무보고.xlsx — Excel</div>
+    <div class="tbar-btns">
+      <div class="tbar-btn">—</div>
+      <div class="tbar-btn">☐</div>
+      <div class="tbar-btn close">✕</div>
+    </div>
+  </div>
+
+  <!-- 리본 -->
+  <div class="ribbon">
+    <div class="ribbon-tabs">
+      <div class="rtab active">홈</div><div class="rtab">삽입</div><div class="rtab">페이지 레이아웃</div>
+      <div class="rtab">수식</div><div class="rtab">데이터</div><div class="rtab">검토</div><div class="rtab">보기</div>
+    </div>
+    <div class="ribbon-body">
+      <div class="rbtn"><div class="rbtn-icon">📋</div><div>붙여넣기</div></div>
+      <div class="rdiv"></div>
+      <div class="rbtn"><div class="rbtn-icon">✂️</div><div>잘라내기</div></div>
+      <div class="rbtn"><div class="rbtn-icon">📄</div><div>복사</div></div>
+      <div class="rdiv"></div>
+      <div class="rbtn"><div class="rbtn-icon" style="font-weight:900;font-family:serif;">B</div><div>굵게</div></div>
+      <div class="rbtn"><div class="rbtn-icon" style="font-style:italic;font-family:serif;">I</div><div>기울임</div></div>
+      <div class="rbtn"><div class="rbtn-icon" style="text-decoration:underline;font-family:serif;">U</div><div>밑줄</div></div>
+      <div class="rdiv"></div>
+      <div class="rbtn"><div class="rbtn-icon">🎨</div><div>채우기</div></div>
+      <div class="rbtn"><div class="rbtn-icon">🔍</div><div>찾기</div></div>
+      <div class="rdiv"></div>
+      <div class="rbtn"><div class="rbtn-icon">📊</div><div>차트</div></div>
+      <div class="rbtn"><div class="rbtn-icon">∑</div><div>합계</div></div>
+    </div>
+  </div>
+
+  <!-- 수식 입력줄 -->
+  <div class="fbar">
+    <div class="fbar-name" id="fbar-name">A1</div>
+    <div class="fbar-fx">ƒx</div>
+    <div class="fbar-val" id="fbar-val"></div>
+  </div>
+
+  <!-- 시트 영역 -->
+  <div id="sheet-area">
+    <div id="s1" class="sheet active">
+      <div id="s1-wrap"></div>
+    </div>
+    <div id="s2" class="sheet">
+      <div id="s2-wrap">
+        <!-- 행 번호 -->
+        <div class="rnums" id="s2-rnums"></div>
+        <!-- 그리드 -->
+        <div class="gwrap">
+          <div class="col-hdrs" id="s2-colhdrs"></div>
+          <div style="position:relative;overflow:hidden;">
+            <div id="grid-rows"></div>
+            <div id="popups" style="position:absolute;top:0;left:0;pointer-events:none;"></div>
+            <div id="overlay"><div class="ovbox" id="ovbox"></div></div>
+          </div>
+        </div>
+        <!-- 정보 패널 -->
+        <div class="ipanel" id="ipanel"></div>
+        <!-- 여백 채우기 -->
+        <div class="s1-filler"></div>
+      </div>
+    </div>
+    <div id="s3" class="sheet">
+      <div id="s3-wrap"></div>
+    </div>
+  </div>
+
+  <!-- 시트 탭 -->
+  <div class="stabs">
+    <div class="stab active" id="tab-s1" onclick="switchSheet('s1')">Sheet1</div>
+    <div class="stab" id="tab-s2" onclick="switchSheet('s2')">Sheet2 🐍</div>
+    <div class="stab" id="tab-s3" onclick="switchSheet('s3')">Sheet3 🏆</div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   상수 / 설정
+════════════════════════════════════════ */
+const COLS = 38, ROWS = 24, CS = 22
+const GOLDEN_TTL = 8000, GOLDEN_PTS = 3, GOLDEN_CHANCE = 0.4
+const DIFF = {
+  NORMAL:{ base:140, perApple:3,  perMile:12, min:60,  label:'보통',  emoji:'🟢' },
+  HARD:  { base:95,  perApple:6,  perMile:20, min:42,  label:'어려움',emoji:'🟠' },
+  HELL:  { base:65,  perApple:3,  perMile:10, min:38,  label:'지옥',  emoji:'🔴' },
+}
+const OPPOSITE = { UP:'DOWN', DOWN:'UP', LEFT:'RIGHT', RIGHT:'LEFT' }
+const NICK_ADJ = ['용감한','느린','빠른','졸린','배고픈','호기심많은','신중한','엉뚱한','당당한','수줍은','활발한','조용한','웃긴','진지한','눈치없는']
+const NICK_ANI = ['호랑이','판다','여우','토끼','곰','고양이','강아지','늑대','너구리','다람쥐','수달','고슴도치','기린','코끼리','펭귄']
+
+/* ════════════════════════════════════════
+   게임 상태
+════════════════════════════════════════ */
+let gs = null   // game state (아래 makeGS 참조)
+let loopId = null, lastMove = 0
+let curDir = 'RIGHT', pendDir = 'RIGHT'
+let obsRef = [], diffRef = 'NORMAL', speedRef = 140, playing = false
+
+function calcSpeed(diff, score){
+  const c = DIFF[diff]
+  return Math.max(c.min, c.base - score*c.perApple - Math.floor(score/10)*c.perMile)
+}
+function calcObsCount(score){ return Math.floor(score/5) }
+
+function makeGS(diff){
+  const snake = [{x:8,y:12},{x:7,y:12},{x:6,y:12}]
+  return {
+    snake, apple: rndPos(snake), goldenApple:null,
+    obstacles:[], obstacleGroupCount:0,
+    direction:'RIGHT', score:0, status:'IDLE',
+    difficulty:diff, speed:DIFF[diff].base
+  }
+}
+
+function rndPos(exclude){
+  const occ = new Set(exclude.map(p=>`${p.x},${p.y}`))
+  let p
+  do { p={x:Math.floor(Math.random()*COLS), y:Math.floor(Math.random()*ROWS)} }
+  while(occ.has(`${p.x},${p.y}`))
+  return p
+}
+
+/* ════════════════════════════════════════
+   장애물 모양 스폰 (7가지)
+════════════════════════════════════════ */
+const SHAPES = [
+  [[0,0],[1,0],[2,0]],              // 0: 가로 직선
+  [[0,0],[0,1],[0,2]],              // 1: 세로 직선
+  [[0,0],[0,1],[1,1]],              // 2: L자
+  [[1,0],[0,1],[1,1]],              // 3: 역L자
+  [[0,0],[1,0],[2,0],[1,1]],        // 4: T자
+  [[0,0],[1,0],[1,1],[2,1]],        // 5: Z형
+  [[0,0],[1,0],[0,1],[1,1]],        // 6+: 2×2
+]
+function spawnShape(taken, groupIdx){
+  const occ = new Set(taken.map(p=>`${p.x},${p.y}`))
+  const offsets = SHAPES[Math.min(groupIdx, SHAPES.length-1)]
+  const fits = (bx,by,offs) => offs.every(([dx,dy])=>{
+    const nx=bx+dx, ny=by+dy
+    return nx>=1&&nx<COLS-1&&ny>=1&&ny<ROWS-1&&!occ.has(`${nx},${ny}`)
+  })
+  for(let a=0;a<400;a++){
+    const bx=2+Math.floor(Math.random()*(COLS-5))
+    const by=2+Math.floor(Math.random()*(ROWS-5))
+    if(fits(bx,by,offsets)) return offsets.map(([dx,dy])=>({x:bx+dx,y:by+dy}))
+  }
+  // 폴백
+  for(let a=0;a<200;a++){
+    const bx=2+Math.floor(Math.random()*(COLS-5))
+    const by=2+Math.floor(Math.random()*(ROWS-5))
+    if(fits(bx,by,[[0,0],[1,0],[2,0]])) return [[0,0],[1,0],[2,0]].map(([dx,dy])=>({x:bx+dx,y:by+dy}))
+  }
+  return [rndPos(taken)]
+}
+
+/* ════════════════════════════════════════
+   오디오 (Web Audio API)
+════════════════════════════════════════ */
+let actx = null
+let bgmStop = null
+
+function getActx(){
+  if(!actx) actx = new AudioContext()
+  return actx
+}
+function tone(freq, startAt, dur, gain, type='square'){
+  const ctx = getActx()
+  const osc = ctx.createOscillator()
+  const g   = ctx.createGain()
+  osc.connect(g); g.connect(ctx.destination)
+  osc.type = type
+  osc.frequency.setValueAtTime(freq, startAt)
+  g.gain.setValueAtTime(gain, startAt)
+  g.gain.exponentialRampToValueAtTime(0.0001, startAt+dur)
+  osc.start(startAt); osc.stop(startAt+dur+.01)
+}
+function sfxApple(){
+  const ctx=getActx(), t=ctx.currentTime
+  tone(880,t,.08,.10); tone(1320,t+.07,.08,.08)
+}
+function sfxGolden(){
+  const ctx=getActx(), t=ctx.currentTime
+  tone(880,t,.07,.10); tone(1100,t+.07,.07,.09); tone(1320,t+.14,.07,.09); tone(1760,t+.21,.12,.11)
+}
+function sfxGameOver(){
+  const ctx=getActx(), t=ctx.currentTime
+  tone(440,t,.15,.11,'sawtooth'); tone(330,t+.16,.15,.11,'sawtooth'); tone(220,t+.32,.25,.11,'sawtooth')
+}
+function sfxObs(){
+  const ctx=getActx(), t=ctx.currentTime
+  tone(120,t,.12,.08,'sawtooth'); tone(90,t+.10,.15,.06,'sawtooth')
+}
+function startBgm(){
+  if(bgmStop) return
+  const ctx=getActx()
+  const mel=[[523,.15],[0,.05],[659,.15],[0,.05],[784,.20],[0,.05],[659,.15],[0,.05],
+             [523,.15],[0,.05],[494,.15],[0,.05],[440,.25],[0,.10],
+             [392,.15],[0,.05],[440,.15],[0,.05],[494,.20],[0,.05],[440,.15],[0,.05],
+             [392,.15],[0,.05],[349,.15],[0,.05],[330,.30],[0,.15]]
+  const G=0.035
+  let running=true, timer=null
+  const loopDur = mel.reduce((s,[,d])=>s+d,0)
+  const sched=(start)=>{
+    if(!running) return
+    let t=start
+    for(const [f,d] of mel){ if(f>0) tone(f,t,d*.85,G); t+=d }
+    const ms=Math.max(0,(start+loopDur-.25-ctx.currentTime)*1000)
+    timer=setTimeout(()=>sched(start+loopDur), ms)
+  }
+  sched(ctx.currentTime+.1)
+  bgmStop=()=>{ running=false; if(timer)clearTimeout(timer); bgmStop=null }
+}
+function stopBgm(){ if(bgmStop) bgmStop() }
+
+/* ════════════════════════════════════════
+   닉네임 / 랭킹
+════════════════════════════════════════ */
+const RANK_KEY='excel-snake-rankings', NICK_KEY='excel-snake-nickname'
+function genNick(){ return `익명의 ${NICK_ADJ[Math.floor(Math.random()*NICK_ADJ.length)]} ${NICK_ANI[Math.floor(Math.random()*NICK_ANI.length)]}` }
+function loadNick(){ return localStorage.getItem(NICK_KEY)||genNick() }
+function saveNick(n){ const v=n.trim()||genNick(); localStorage.setItem(NICK_KEY,v); return v }
+function loadRanks(){ try{ return JSON.parse(localStorage.getItem(RANK_KEY)||'[]') }catch{ return [] } }
+function addRank(score, diff){
+  const nick=loadNick()
+  const ranks=loadRanks()
+  ranks.push({id:crypto.randomUUID(), nickname:nick, score, difficulty:diff, date:new Date().toLocaleDateString('ko-KR')})
+  ranks.sort((a,b)=>b.score-a.score)
+  const top=ranks.slice(0,50)
+  localStorage.setItem(RANK_KEY, JSON.stringify(top))
+}
+
+/* ════════════════════════════════════════
+   그리드 DOM 초기화
+════════════════════════════════════════ */
+let cells = []  // cells[y][x]
+
+function initGrid(){
+  const rnums = document.getElementById('s2-rnums')
+  const colhdrs = document.getElementById('s2-colhdrs')
+  const gridEl = document.getElementById('grid-rows')
+
+  // 행 번호
+  const topDiv = document.createElement('div')
+  topDiv.className='rnums-top'; rnums.appendChild(topDiv)
+  for(let y=0;y<ROWS;y++){
+    const d=document.createElement('div')
+    d.className='rnum'; d.textContent=y+1; rnums.appendChild(d)
+  }
+
+  // 열 헤더
+  for(let x=0;x<COLS;x++){
+    const d=document.createElement('div')
+    d.className='col-hdr'
+    d.textContent=x<26?String.fromCharCode(65+x):'A'+String.fromCharCode(65+(x-26))
+    colhdrs.appendChild(d)
+  }
+
+  // 셀 그리드
+  cells=[]
+  for(let y=0;y<ROWS;y++){
+    cells[y]=[]
+    const row=document.createElement('div')
+    row.className='grow'
+    for(let x=0;x<COLS;x++){
+      const c=document.createElement('div')
+      c.className='gc'; row.appendChild(c); cells[y][x]=c
+    }
+    gridEl.appendChild(row)
+  }
+
+  gs = makeGS('NORMAL')
+  diffRef = 'NORMAL'
+  renderGrid()
+  renderInfoPanel()
+  showOverlay()
+}
+
+/* ════════════════════════════════════════
+   렌더링
+════════════════════════════════════════ */
+function renderGrid(){
+  if(!gs) return
+  const headKey = gs.snake.length>0 ? `${gs.snake[0].x},${gs.snake[0].y}` : ''
+  const snakeSet = new Set(gs.snake.map(p=>`${p.x},${p.y}`))
+  const obsSet   = new Set(gs.obstacles.map(p=>`${p.x},${p.y}`))
+  const now = Date.now()
+  const goldenUrgent = gs.goldenApple && (gs.goldenApple.expiresAt - now) < 3000
+
+  for(let y=0;y<ROWS;y++){
+    for(let x=0;x<COLS;x++){
+      const key=`${x},${y}`
+      let cls='gc'
+      if(key===headKey) cls+=' gc-head'
+      else if(snakeSet.has(key)) cls+=' gc-body'
+      else if(gs.apple && gs.apple.x===x && gs.apple.y===y) cls+=' gc-apple'
+      else if(gs.goldenApple && gs.goldenApple.position.x===x && gs.goldenApple.position.y===y)
+        cls += goldenUrgent ? ' gc-golden-u' : ' gc-golden'
+      else if(obsSet.has(key)) cls+=' gc-obs'
+      cells[y][x].className=cls
+    }
+  }
+}
+
+let ipRow = 0
+function renderInfoPanel(){
+  if(!gs) return
+  const panel = document.getElementById('ipanel')
+  const diff = gs.difficulty
+  const cfg = DIFF[diff]
+  const accent = diff==='NORMAL'?'#217346':diff==='HARD'?'#e65100':'#b71c1c'
+  const scoreBg= diff==='NORMAL'?'#e8f5e9':diff==='HARD'?'#fff3e0':'#ffebee'
+
+  const goldenMs = gs.goldenApple ? Math.max(0, gs.goldenApple.expiresAt-Date.now()) : 0
+  const goldenSec= Math.ceil(goldenMs/1000)
+  const goldenPct= (goldenMs/GOLDEN_TTL)*100
+  const goldenUrgent = goldenMs>0 && goldenMs<3000
+  const hasGolden= !!gs.goldenApple
+  const isHell   = diff==='HELL'
+  const topRanks = loadRanks().filter(r=>r.difficulty===diff).slice(0,3)
+
+  ipRow=1
+  const rows=[]
+  const r=(n,inner,h=22,cls='')=>`<div class="ir ${cls}" style="height:${h}px"><div class="ir-rn">${n}</div>${inner}</div>`
+  const rowLV=(n,lbl,val,valStyle='')=>r(n,`<div class="ir-lbl">${lbl}</div><div class="ir-val" style="${valStyle}">${val}</div>`)
+  const rowM=(n,inner)=>r(n,`<div class="ir-mrg">${inner}</div>`)
+  const rowDiv=(n)=>`<div class="ir ir-div" style="height:22px"><div class="ir-rn">${n}</div><div class="ir-dvline"></div></div>`
+
+  rows.push(rowM(ipRow++,`<span style="font-size:10px;font-weight:700;color:${accent}">현재 게임</span>`))
+
+  // 점수 (대형)
+  rows.push(`<div class="ir ir-h54" style="background:${scoreBg}">
+    <div class="ir-rn">${ipRow++}</div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+      <span style="font-size:9px;color:#aaa;letter-spacing:.1em;text-transform:uppercase">score</span>
+      <span class="score-big" style="color:${accent}">${gs.score}</span>
+    </div>
+  </div>`)
+
+  rows.push(rowLV(ipRow++,'속도', gs.status==='IDLE'?'—':`${gs.speed} ms`))
+  rows.push(rowLV(ipRow++,'뱀 길이', `${gs.snake.length} 칸`))
+  rows.push(rowLV(ipRow++,'난이도', `${cfg.emoji} ${cfg.label}`))
+
+  if(gs.status==='PLAYING'){
+    const pct=((gs.score%10)/10)*100
+    rows.push(r(ipRow++,`<div class="ir-mrg" style="gap:6px">
+      <span style="font-size:9px;color:#aaa;width:40px;flex-shrink:0">다음가속</span>
+      <div class="pbar-wrap"><div class="pbar-fill" style="width:${pct}%;background:${accent}"></div></div>
+      <span style="font-size:9px;color:#aaa;flex-shrink:0">${10-(gs.score%10)}</span>
+    </div>`))
+  }
+
+  rows.push(rowDiv(ipRow++))
+
+  // 황금사과
+  if(hasGolden){
+    rows.push(`<div class="ir" style="height:22px;background:${goldenUrgent?'#fff8f8':'#fffde7'}">
+      <div class="ir-rn">${ipRow++}</div>
+      <div class="ir-lbl"><span style="font-size:11px;font-weight:700;color:${goldenUrgent?'#c62828':'#f57f17'}">🌟 황금사과 +${GOLDEN_PTS}점</span></div>
+      <div class="ir-val" style="font-weight:700;font-size:13px;color:${goldenUrgent?'#c62828':'#f9a825'}">${goldenSec}s</div>
+    </div>`)
+    rows.push(r(ipRow++,`<div class="ir-mrg">
+      <div class="pbar-wrap"><div class="pbar-fill" style="width:${goldenPct}%;background:${goldenUrgent?'#e53935':'#fdd835'}"></div></div>
+    </div>`))
+    rows.push(rowDiv(ipRow++))
+  }
+
+  // 지옥 장애물
+  if(isHell && gs.status==='PLAYING'){
+    const opct=((gs.score%5)/5)*100
+    const ocnt=gs.obstacleGroupCount
+    rows.push(r(ipRow++,`<div class="ir-mrg" style="gap:6px">
+      <span style="font-size:9px;color:#ef9a9a;width:36px;flex-shrink:0">장애물</span>
+      <div class="pbar-wrap"><div class="pbar-fill" style="width:${opct}%;background:#ef5350"></div></div>
+      <span style="font-size:9px;color:#ef9a9a;flex-shrink:0">${5-(gs.score%5)}개후·${ocnt}그룹</span>
+    </div>`))
+    rows.push(rowDiv(ipRow++))
+  }
+
+  // 조작법
+  rows.push(rowM(ipRow++,'<span style="font-size:10px;font-weight:700;color:#aaa">조작법</span>'))
+  rows.push(rowLV(ipRow++,'이동','↑↓←→  WASD'))
+  rows.push(rowLV(ipRow++,'시작/중지','Space'))
+  rows.push(rowLV(ipRow++,'일시정지','ESC'))
+  rows.push(rowDiv(ipRow++))
+
+  // Top 3
+  rows.push(rowM(ipRow++,`<span style="font-size:10px;font-weight:700;color:${accent}">${cfg.emoji} Top 3</span>`))
+  if(topRanks.length===0){
+    rows.push(rowM(ipRow++,'<span style="font-size:10px;color:#bbb;font-style:italic">기록 없음</span>'))
+  } else {
+    const medals=['🥇','🥈','🥉']
+    topRanks.forEach((e,i)=>{
+      rows.push(rowLV(ipRow++,`${medals[i]} ${e.nickname}`,String(e.score),`font-weight:700;color:${accent}`))
+    })
+  }
+
+  panel.innerHTML=`
+    <div class="ip-chdrs">
+      <div class="ir-rn" style="border-right:1px solid #d0d0d0;height:100%"></div>
+      <div class="ip-chd" style="width:108px">A</div>
+      <div class="ip-chd" style="flex:1">B</div>
+    </div>
+    ${rows.join('')}
+  `
+}
+
+/* ════════════════════════════════════════
+   오버레이 (시작/일시정지/게임오버)
+════════════════════════════════════════ */
+function showOverlay(){
+  const el=document.getElementById('overlay')
+  const box=document.getElementById('ovbox')
+  el.style.display='flex'
+  const diff=diffRef, cfg=DIFF[diff]
+  const accent= diff==='NORMAL'?'#217346':diff==='HARD'?'#e65100':'#b71c1c'
+  const status=gs?gs.status:'IDLE'
+  const nick=loadNick()
+
+  const diffBtns=Object.keys(DIFF).map(d=>`
+    <button class="dbtn ${(status==='IDLE'||status==='GAME_OVER')?'':'disabled'} ${d===diff?'sel-'+d:''}"
+      onclick="onChangeDiff('${d}')">${DIFF[d].emoji}<br>${DIFF[d].label}</button>
+  `).join('')
+
+  let topHtml=''
+  if(status==='GAME_OVER'){
+    topHtml=`<div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:#c62828;margin-bottom:6px">게임 오버</div>
+      <div class="score-big" style="color:${accent}">${gs.score}</div>
+      <div style="font-size:11px;color:#aaa;margin-top:4px">사과 ${gs.score}개 획득</div>
+    </div>`
+  } else if(status==='PAUSED'){
+    topHtml=`<div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:#f57f17;margin-bottom:4px">일시정지</div>
+      <div style="font-size:36px;font-weight:900;color:${accent}">${gs.score}</div>
+    </div>`
+  } else {
+    topHtml=`<div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:24px;margin-bottom:4px">${cfg.emoji}</div>
+      <div style="font-size:15px;font-weight:700;color:#333">Snake Game</div>
+      <div style="font-size:11px;color:#aaa;margin-top:4px">↑↓←→ / WASD</div>
+    </div>`
+  }
+
+  const descMap={NORMAL:'천천히 시작, 완만한 가속', HARD:'빠른 시작 + 황금사과', HELL:'극한 속도 + 장애물 + 황금사과'}
+
+  box.innerHTML=`
+    ${topHtml}
+    <div style="margin-bottom:12px">
+      <div style="font-size:10px;color:#aaa;margin-bottom:4px">닉네임</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input id="nick-inp" class="nick-input" value="${escHtml(nick)}" style="flex:1">
+        <button class="btn btn-sm btn-gray" onclick="onAutoNick()">자동</button>
+      </div>
+    </div>
+    ${(status==='IDLE'||status==='GAME_OVER')?`
+    <div style="margin-bottom:12px">
+      <div style="font-size:10px;color:#aaa;margin-bottom:6px">난이도</div>
+      <div class="diff-row">${diffBtns}</div>
+      <div style="font-size:10px;color:#aaa;text-align:center">${descMap[diff]}</div>
+    </div>`:''}
+    <div style="display:flex;gap:8px">
+      ${status==='PAUSED'?`
+        <button class="btn btn-g" style="flex:1" onclick="onResume()">계속하기</button>
+        <button class="btn btn-gray" style="flex:1" onclick="onReset()">처음부터</button>
+      `:`<button class="btn" style="flex:1;background:${accent};color:#fff" onclick="onStart()">
+          ${status==='GAME_OVER'?'다시 시작':'시작  (Space)'}
+        </button>`}
+    </div>
+  `
+}
+
+function hideOverlay(){
+  document.getElementById('overlay').style.display='none'
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+/* ════════════════════════════════════════
+   오버레이 이벤트
+════════════════════════════════════════ */
+function getNickInput(){ return (document.getElementById('nick-inp')||{value:''}).value.trim() }
+
+function onStart(){
+  const n=getNickInput(); if(n) saveNick(n)
+  startGame()
+}
+function onResume(){
+  if(gs&&gs.status==='PAUSED'){
+    gs.status='PLAYING'; playing=true; lastMove=Date.now()
+    hideOverlay(); startBgm(); startLoop()
+  }
+}
+function onReset(){
+  stopLoop(); stopBgm(); playing=false
+  gs=makeGS(diffRef)
+  obsRef=[]; speedRef=DIFF[diffRef].base; curDir='RIGHT'; pendDir='RIGHT'
+  renderGrid(); renderInfoPanel(); showOverlay()
+}
+function onChangeDiff(d){
+  diffRef=d; gs=makeGS(d)
+  obsRef=[]; speedRef=DIFF[d].base; curDir='RIGHT'; pendDir='RIGHT'
+  renderGrid(); showOverlay()
+}
+function onAutoNick(){
+  const n=genNick()
+  const inp=document.getElementById('nick-inp')
+  if(inp) inp.value=n
+  saveNick(n)
+}
+
+/* ════════════════════════════════════════
+   게임 루프
+════════════════════════════════════════ */
+function startGame(){
+  stopLoop(); stopBgm()
+  gs=makeGS(diffRef)
+  gs.status='PLAYING'
+  obsRef=[]; speedRef=gs.speed; curDir='RIGHT'; pendDir='RIGHT'
+  playing=true; lastMove=Date.now()
+  hideOverlay(); renderGrid(); renderInfoPanel()
+  startBgm(); startLoop()
+}
+
+function startLoop(){
+  if(loopId) clearInterval(loopId)
+  lastMove=Date.now()
+  loopId=setInterval(tick, 16)
+}
+function stopLoop(){
+  if(loopId){ clearInterval(loopId); loopId=null }
+}
+
+let prevScore=0, prevApple={x:-1,y:-1}, prevHadGolden=false, prevGoldenPos={x:-1,y:-1}
+let prevObsLen=0
+
+function tick(){
+  if(!playing||!gs||gs.status!=='PLAYING') return
+  const now=Date.now()
+  const shouldMove = now-lastMove >= speedRef
+
+  // 황금사과 만료
+  if(gs.goldenApple && now >= gs.goldenApple.expiresAt){
+    gs.goldenApple=null
+  }
+
+  if(shouldMove){
+    // 방향 결정
+    if(pendDir !== OPPOSITE[curDir]) curDir=pendDir
+    lastMove=now
+
+    const head=gs.snake[0]
+    const next={
+      x: curDir==='LEFT'?head.x-1:curDir==='RIGHT'?head.x+1:head.x,
+      y: curDir==='UP'  ?head.y-1:curDir==='DOWN' ?head.y+1:head.y,
+    }
+
+    // 충돌
+    if(next.x<0||next.x>=COLS||next.y<0||next.y>=ROWS||
+       gs.snake.slice(0,-1).some(p=>p.x===next.x&&p.y===next.y)||
+       gs.obstacles.some(o=>o.x===next.x&&o.y===next.y)){
+      gs.status='GAME_OVER'; playing=false
+      stopLoop(); stopBgm(); sfxGameOver()
+      if(gs.score>0) addRank(gs.score, diffRef)
+      renderGrid(); renderInfoPanel(); showOverlay()
+      return
+    }
+
+    const ateApple = next.x===gs.apple.x && next.y===gs.apple.y
+    const ateGolden = gs.goldenApple &&
+      next.x===gs.goldenApple.position.x && next.y===gs.goldenApple.position.y
+
+    const grows = ateApple
+    gs.snake = grows ? [next,...gs.snake] : [next,...gs.snake.slice(0,-1)]
+
+    if(ateApple) gs.score += 1
+    if(ateGolden){ gs.score += GOLDEN_PTS; gs.goldenApple=null }
+
+    if(ateApple){
+      gs.apple = rndPos([...gs.snake,...gs.obstacles,...(gs.goldenApple?[gs.goldenApple.position]:[])])
+      sfxApple()
+      spawnPopup(gs.apple.x>0?{x:next.x,y:next.y}:{x:next.x,y:next.y}, '+1', false)
+    }
+    if(ateGolden){
+      sfxGolden()
+      spawnPopup({x:next.x,y:next.y}, `+${GOLDEN_PTS}`, true)
+    }
+
+    gs.speed = calcSpeed(diffRef, gs.score)
+    speedRef = gs.speed
+
+    // 지옥 장애물
+    if(ateApple && diffRef==='HELL'){
+      const target=calcObsCount(gs.score)
+      if(target > gs.obstacleGroupCount){
+        const taken=[...gs.snake,gs.apple,...gs.obstacles,...(gs.goldenApple?[gs.goldenApple.position]:[]) ]
+        const group=spawnShape(taken, gs.obstacleGroupCount)
+        gs.obstacles=[...gs.obstacles,...group]
+        gs.obstacleGroupCount++
+        obsRef=gs.obstacles
+        sfxObs()
+      }
+    }
+
+    // 황금사과 스폰
+    if(ateApple && (diffRef==='HARD'||diffRef==='HELL') && !gs.goldenApple){
+      if(Math.random()<GOLDEN_CHANCE){
+        const taken=[...gs.snake,gs.apple,...gs.obstacles]
+        gs.goldenApple={ position:rndPos(taken), expiresAt:now+GOLDEN_TTL }
+      }
+    }
+  }
+
+  renderGrid()
+  renderInfoPanel()
+}
+
+/* ════════════════════════════════════════
+   점수 팝업
+════════════════════════════════════════ */
+function spawnPopup(pos, text, isGolden){
+  const wrap=document.getElementById('popups')
+  if(!wrap) return
+  const div=document.createElement('div')
+  div.className=`popup ${isGolden?'popup-g':'popup-n'}`
+  div.textContent=text
+  div.style.left=`${pos.x*CS+CS/2}px`
+  div.style.top =`${pos.y*CS-2}px`
+  wrap.appendChild(div)
+  setTimeout(()=>div.remove(), 850)
+}
+
+/* ════════════════════════════════════════
+   Sheet1 초기화
+════════════════════════════════════════ */
+const S1_HEADERS=['항목','1월','2월','3월','4월','5월','6월','합계']
+const S1_ROWS=[
+  ['인건비',   '12,500,000','12,500,000','12,500,000','12,500,000','12,500,000','12,500,000','75,000,000'],
+  ['임차료',    '3,200,000', '3,200,000', '3,200,000', '3,200,000', '3,200,000', '3,200,000','19,200,000'],
+  ['통신비',      '450,000',   '380,000',   '410,000',   '450,000',   '420,000',   '390,000', '2,500,000'],
+  ['소모품비',    '230,000',   '180,000',   '310,000',   '190,000',   '270,000',   '220,000', '1,400,000'],
+  ['교통비',      '890,000',   '760,000',   '820,000',   '910,000',   '840,000',   '780,000', '5,000,000'],
+  ['접대비',    '1,200,000',   '980,000', '1,100,000', '1,350,000', '1,050,000', '1,020,000', '6,700,000'],
+  ['교육훈련비',  '500,000',   '500,000',   '500,000',   '500,000',   '500,000',   '500,000', '3,000,000'],
+  ['광고선전비','2,100,000', '1,800,000', '2,400,000', '2,200,000', '1,950,000', '2,050,000','12,500,000'],
+  ['합계',    '21,070,000','20,300,000','21,240,000','21,300,000','20,730,000','20,660,000','125,300,000'],
+]
+const S1_COLS=15
+const COL_W=[40,130,92,92,92,92,92,92,92,92,92,92,92,92,92]
+const S1_STORE='sheet1-cell-data'
+
+function getS1Default(r,c){
+  if(r===1&&c<S1_HEADERS.length) return S1_HEADERS[c]
+  const dr=r-3
+  if(dr>=0&&dr<S1_ROWS.length&&c<S1_ROWS[dr].length) return S1_ROWS[dr][c]
+  return ''
+}
+
+function loadS1Overrides(){ try{ return JSON.parse(localStorage.getItem(S1_STORE)||'{}') }catch{ return {} } }
+function saveS1Overrides(o){ localStorage.setItem(S1_STORE, JSON.stringify(o)) }
+
+function initSheet1(){
+  const wrap=document.getElementById('s1-wrap')
+  const overrides=loadS1Overrides()
+  const TOTAL_ROWS_S1=30
+
+  let editCell=null, editVal=''
+
+  function getCellVal(r,c){
+    const k=`${r}-${c}`
+    return k in overrides ? overrides[k] : getS1Default(r,c)
+  }
+
+  function commit(r,c,val){
+    const k=`${r}-${c}`
+    const def=getS1Default(r,c)
+    if(val===def) delete overrides[k]
+    else overrides[k]=val
+    saveS1Overrides(overrides)
+    editCell=null
+    renderS1()
+  }
+
+  function renderS1(){
+    const isHdr=r=>r===1
+    const isTotal=r=>r===3+S1_ROWS.length-1
+
+    let html=`<table class="s1-tbl"><colgroup>`
+    // rnum col
+    html+=`<col style="width:40px">`
+    for(let c=0;c<S1_COLS;c++) html+=`<col style="width:${COL_W[c+1]||80}px">`
+    html+=`</colgroup><thead><tr><th class="s1-rnum"></th>`
+    for(let c=0;c<S1_COLS;c++) html+=`<th>${String.fromCharCode(65+c)}</th>`
+    html+=`</tr></thead><tbody>`
+
+    for(let r=0;r<TOTAL_ROWS_S1;r++){
+      const hdr=isHdr(r), tot=isTotal(r)
+      html+=`<tr>`
+      html+=`<td class="s1-rnum">${r+1}</td>`
+      for(let c=0;c<S1_COLS;c++){
+        const key=`${r}-${c}`
+        const val=getCellVal(r,c)
+        const isEditing= editCell===key
+        const isNumCol= c>0
+        let cls=''
+        if(hdr) cls='s1-hdr' // handled via row
+        else if(tot) cls='s1-total s1-num'
+        else if(c===0&&r>=3&&r<3+S1_ROWS.length) cls='s1-lbl'
+        else if(isNumCol&&val) cls='s1-num'
+
+        if(isEditing){
+          html+=`<td class="${cls} editing" data-r="${r}" data-c="${c}">
+            <input id="s1-inp" value="${escHtml(editVal)}" style="width:${COL_W[c]||80}px;height:22px;border:none;outline:none;background:transparent;font-size:12px;padding:0 4px;font-family:inherit;">
+          </td>`
+        } else {
+          html+=`<td class="${cls}" data-r="${r}" data-c="${c}">${escHtml(val)}</td>`
+        }
+      }
+      html+=`</tr>`
+    }
+    html+=`</tbody></table>`
+
+    wrap.innerHTML=html
+
+    // 이벤트
+    wrap.querySelectorAll('td[data-r]').forEach(td=>{
+      td.addEventListener('dblclick',()=>{
+        const r=+td.dataset.r, c=+td.dataset.c
+        editCell=`${r}-${c}`; editVal=getCellVal(r,c); renderS1()
+        const inp=document.getElementById('s1-inp')
+        if(inp){ inp.focus(); inp.select() }
+      })
+    })
+
+    const inp=document.getElementById('s1-inp')
+    if(inp){
+      inp.focus(); inp.select()
+      inp.addEventListener('input',e=>{ editVal=e.target.value })
+      inp.addEventListener('keydown',e=>{
+        if(e.key==='Enter'||e.key==='Tab'){
+          e.preventDefault()
+          const [r,c]=editCell.split('-').map(Number)
+          commit(r,c,inp.value)
+        }
+        if(e.key==='Escape'){ editCell=null; renderS1() }
+      })
+      inp.addEventListener('blur',()=>{
+        if(editCell){
+          const [r,c]=editCell.split('-').map(Number)
+          commit(r,c,inp.value)
+        }
+      })
+    }
+  }
+
+  renderS1()
+}
+
+/* ════════════════════════════════════════
+   Sheet3 랭킹
+════════════════════════════════════════ */
+const MEDAL=['🥇','🥈','🥉']
+const SECTION_STYLE={
+  NORMAL:{hdrBg:'#1b5e20',hdrTxt:'#fff',gold:'#fff9c4',silver:'#f5f5f5',bronze:'#fff3e0',score:'#1b5e20'},
+  HARD:  {hdrBg:'#e65100',hdrTxt:'#fff',gold:'#fff9c4',silver:'#f5f5f5',bronze:'#fff3e0',score:'#e65100'},
+  HELL:  {hdrBg:'#b71c1c',hdrTxt:'#fff',gold:'#fff9c4',silver:'#f5f5f5',bronze:'#fff3e0',score:'#b71c1c'},
+}
+const SW={rank:36,nick:148,score:66}
+const RNUMW=40, DIVW=16
+const DIFFS=['NORMAL','HARD','HELL']
+
+function renderSheet3(){
+  const wrap=document.getElementById('s3-wrap')
+  const ranks=loadRanks()
+  const nick=loadNick()
+  const byDiff=d=>ranks.filter(r=>r.difficulty===d)
+  const maxRows=Math.max(0,...DIFFS.map(d=>byDiff(d).length))
+  const totalW=RNUMW+DIFFS.length*(SW.rank+SW.nick+SW.score)+(DIFFS.length-1)*DIVW+40
+
+  const colW=`style="width:${SW.rank}px"`, colN=`style="width:${SW.nick}px"`, colS=`style="width:${SW.score}px"`
+
+  // 헤더 행 (열 라벨)
+  let colGrp=`<col style="width:${RNUMW}px">`
+  DIFFS.forEach((d,i)=>{
+    if(i>0) colGrp+=`<col style="width:${DIVW}px">`
+    colGrp+=`<col style="width:${SW.rank}px"><col style="width:${SW.nick}px"><col style="width:${SW.score}px">`
+  })
+
+  let thRow=`<th class="s3-rnum"></th>`
+  DIFFS.forEach((d,i)=>{
+    if(i>0) thRow+=`<th style="width:${DIVW}px;background:#f0f0f0"></th>`
+    thRow+=`<th>순위</th><th>닉네임</th><th>점수</th>`
+  })
+
+  let rows=''
+  // 행1: 타이틀
+  rows+=`<tr style="height:28px"><td class="s3-rnum">1</td>`
+  rows+=`<td colspan="${1+DIFFS.length*3+(DIFFS.length-1)}" style="background:#212121;color:#fff;font-weight:700;font-size:13px;padding:0 12px">🐍 Snake Game — 명예의 전당</td></tr>`
+
+  // 행2: 닉네임
+  rows+=`<tr style="height:26px"><td class="s3-rnum">2</td>`
+  rows+=`<td colspan="2" style="background:#f9f9f9;font-size:10px;color:#aaa;padding:0 6px">내 닉네임</td>`
+  rows+=`<td colspan="${DIFFS.length*3+(DIFFS.length-1)-2}" style="padding:0 6px;font-size:13px;font-weight:500">${escHtml(nick)}</td></tr>`
+
+  // 행3: 빈 행
+  rows+=`<tr style="height:10px"><td class="s3-rnum">3</td><td colspan="${1+DIFFS.length*3+(DIFFS.length-1)}"></td></tr>`
+
+  // 행4: 섹션 헤더
+  rows+=`<tr style="height:30px"><td class="s3-rnum">4</td>`
+  DIFFS.forEach((d,i)=>{
+    const s=SECTION_STYLE[d]
+    if(i>0) rows+=`<td style="background:#f0f0f0;width:${DIVW}px"></td>`
+    rows+=`<td colspan="3" style="background:${s.hdrBg};color:${s.hdrTxt};font-weight:700;font-size:13px;text-align:center">${DIFF[d].emoji} ${DIFF[d].label} (${byDiff(d).length}명)</td>`
+  })
+  rows+=`</tr>`
+
+  // 행5: 서브헤더
+  rows+=`<tr style="height:20px"><td class="s3-rnum">5</td>`
+  DIFFS.forEach((d,i)=>{
+    if(i>0) rows+=`<td style="background:#f9f9f9"></td>`
+    rows+=`<td style="background:#f2f2f2;text-align:center;font-size:10px;color:#666">순위</td>`
+    rows+=`<td style="background:#f2f2f2;font-size:10px;color:#666;padding:0 4px">닉네임</td>`
+    rows+=`<td style="background:#f2f2f2;text-align:right;font-size:10px;color:#666;padding:0 4px">점수</td>`
+  })
+  rows+=`</tr>`
+
+  // 데이터 행
+  if(maxRows===0){
+    rows+=`<tr style="height:28px"><td class="s3-rnum">6</td>`
+    rows+=`<td colspan="${1+DIFFS.length*3+(DIFFS.length-1)}" style="font-size:11px;color:#aaa;font-style:italic;padding:0 12px">아직 기록이 없습니다. Sheet2에서 게임을 즐겨보세요!</td></tr>`
+  } else {
+    for(let ri=0;ri<maxRows;ri++){
+      const rank=ri+1
+      const isTop3=rank<=3
+      const rowH=28
+      rows+=`<tr style="height:${rowH}px"><td class="s3-rnum">${ri+6}</td>`
+      DIFFS.forEach((d,si)=>{
+        const s=SECTION_STYLE[d]
+        const entry=byDiff(d)[ri]||null
+        const bg=isTop3?(rank===1?s.gold:rank===2?s.silver:s.bronze):(ri%2===0?'#fff':'#fafafa')
+        if(si>0) rows+=`<td style="background:#f9f9f9"></td>`
+        // 순위
+        rows+=`<td style="background:${bg};text-align:center">`
+        if(entry){ rows+=isTop3?`<span style="font-size:14px">${MEDAL[ri]}</span>`:`<span style="font-size:11px;color:#888">${rank}</span>` }
+        rows+=`</td>`
+        // 닉네임
+        rows+=`<td style="background:${bg};padding:0 4px;font-size:${isTop3?12:11}px;font-weight:${isTop3?500:400};color:#${isTop3?'333':'666'};max-width:${SW.nick}px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">`
+        if(entry) rows+=escHtml(entry.nickname)
+        rows+=`</td>`
+        // 점수
+        rows+=`<td style="background:${bg};text-align:right;padding:0 6px;font-weight:700;font-size:${isTop3?13:11}px;color:${s.score}">`
+        if(entry) rows+=entry.score
+        rows+=`</td>`
+      })
+      rows+=`</tr>`
+    }
+  }
+
+  wrap.innerHTML=`<table class="s3-tbl"><colgroup>${colGrp}</colgroup>
+    <thead><tr>${thRow}</tr></thead><tbody>${rows}</tbody></table>`
+}
+
+/* ════════════════════════════════════════
+   시트 전환
+════════════════════════════════════════ */
+function switchSheet(id){
+  document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('active'))
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+  document.getElementById('tab-'+id).classList.add('active')
+  if(id==='s3') renderSheet3()
+}
+
+/* ════════════════════════════════════════
+   키보드
+════════════════════════════════════════ */
+const editingInputTags=new Set(['INPUT','TEXTAREA'])
+document.addEventListener('keydown',e=>{
+  if(editingInputTags.has(document.activeElement?.tagName||'')) return
+  const s2active=document.getElementById('s2').classList.contains('active')
+  if(!s2active) return
+  switch(e.key){
+    case 'ArrowUp':   case 'w': case 'W': e.preventDefault(); pendDir='UP';    break
+    case 'ArrowDown': case 's': case 'S': e.preventDefault(); pendDir='DOWN';  break
+    case 'ArrowLeft': case 'a': case 'A': e.preventDefault(); pendDir='LEFT';  break
+    case 'ArrowRight':case 'd': case 'D': e.preventDefault(); pendDir='RIGHT'; break
+    case ' ':
+      e.preventDefault()
+      if(!gs||gs.status==='IDLE'||gs.status==='GAME_OVER') onStart()
+      else if(gs.status==='PLAYING'){ gs.status='PAUSED'; playing=false; stopLoop(); stopBgm(); showOverlay() }
+      else if(gs.status==='PAUSED') onResume()
+      break
+    case 'Escape':
+      if(gs&&gs.status==='PLAYING'){ gs.status='PAUSED'; playing=false; stopLoop(); stopBgm(); showOverlay() }
+      break
+  }
+})
+
+/* ════════════════════════════════════════
+   동적 타이틀
+════════════════════════════════════════ */
+function setTitle(){
+  const d=new Date()
+  const y=d.getFullYear(), m=d.getMonth()+1
+  const t=`${y}년_${m}월_업무보고.xlsx`
+  document.getElementById('page-title').textContent=t
+  document.getElementById('file-title').textContent=`${t} — Excel`
+}
+
+/* ════════════════════════════════════════
+   초기화
+════════════════════════════════════════ */
+setTitle()
+initSheet1()
+initGrid()
+</script>
+</body>
+</html>
